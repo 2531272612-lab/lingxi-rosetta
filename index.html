@@ -96,89 +96,51 @@
             <div style="text-align:center; color:#333; margin-top:50px">[ 引擎待机中 ]</div>
         </div>
     </div>
-
     <script>
-        let portraitTags = JSON.parse(localStorage.getItem('lingxi_tags')) || [];
-        let currentAff = 30;
+    // ...之前的代码保持不变...
+    async function startAnalysis() {
+        const chat = document.getElementById('chatInput').value;
+        const goal = document.getElementById('goalSelect').value;
+        const output = document.getElementById('output');
+        if(!chat) return alert("请输入内容");
 
-        window.onload = () => renderTags();
+        output.innerHTML = `<div style="text-align:center; color:var(--cyan);">大脑连接中...</div>`;
 
-        function addTag(e) {
-            if (e.key === 'Enter' && e.target.value) {
-                portraitTags.push(e.target.value);
-                localStorage.setItem('lingxi_tags', JSON.stringify(portraitTags));
-                e.target.value = '';
-                renderTags();
+        const fullPrompt = `你现在是社交引擎“罗塞塔”。[画像碎片]：${portraitTags.join(', ')} [当前对话]：${chat} [用户目标]：${goal} 请分析并返回JSON。`;
+
+        try {
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: fullPrompt })
+            });
+
+            const data = await response.json();
+
+            // 如果后端传回了 Google 的具体错误
+            if (data.googleError) {
+              throw new Error("Google 拒绝了请求：" + data.googleError);
             }
+
+            // 正常解析
+            const aiText = data.candidates[0].content.parts[0].text;
+            const cleanJson = aiText.replace(/```json|```/g, '').trim();
+            const result = JSON.parse(cleanJson);
+            
+            // ...更新 UI 的逻辑 (currentAff 等)...
+            output.innerHTML = `<div class="card">推演结果：${result.inference}</div>`; 
+
+        } catch (err) {
+            output.innerHTML = `<div style="color:red; font-size:12px; padding:20px;">
+                🚨 破译中断！<br>
+                详细原因：${err.message}<br><br>
+                💡 解决建议：<br>
+                1. 检查 Vercel 里的 API Key 是否有空格。<br>
+                2. 检查 Google AI Studio 是否给了权限。<br>
+                3. 确保你的“魔法”网络稳定。
+            </div>`;
         }
-
-        function renderTags() {
-            const list = document.getElementById('tagList');
-            list.innerHTML = portraitTags.map(t => `<div class="tag-item">${t}</div>`).join('');
-            const decRate = Math.min(100, portraitTags.length * 10);
-            document.getElementById('decDisplay').innerText = decRate + '%';
-        }
-
-        async function startAnalysis() {
-            const chat = document.getElementById('chatInput').value;
-            const goal = document.getElementById('goalSelect').value;
-            const output = document.getElementById('output');
-            if(!chat) return alert("请输入内容");
-
-            output.innerHTML = `<div style="text-align:center; color:var(--cyan);">正在呼叫云端大脑，请稍候...</div>`;
-
-            const fullPrompt = `你现在是社交分析引擎“罗塞塔”。
-            [画像碎片]：${portraitTags.join(', ')}
-            [当前对话]：${chat}
-            [用户目标]：${goal}
-            任务：
-            1. 结合画像推演对方此时的真实潜台词。
-            2. 给出好感度变化建议（-10到+10）。
-            3. 给出两个回复选项。
-            必须严格返回 JSON 格式：{"inference": "...", "aff_change": 5, "options": [{"tag": "方向", "text": "..."}]}`;
-
-            try {
-                // 核心：指向我们部署在 Vercel 的后端接口
-                const response = await fetch('/api/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: fullPrompt })
-                });
-
-                if (!response.ok) throw new Error('后端响应异常');
-                
-                const data = await response.json();
-                
-                // 解析 AI 返回的内容
-                let aiText = data.candidates[0].content.parts[0].text;
-                const cleanJson = aiText.replace(/```json|```/g, '').trim();
-                const result = JSON.parse(cleanJson);
-                
-                currentAff += result.aff_change;
-                document.getElementById('affDisplay').innerText = currentAff + '%';
-                
-                output.innerHTML = `
-                    <div class="card">
-                        <span class="card-header">灵犀·适度推演报告</span>
-                        <div class="card-body">${result.inference}</div>
-                    </div>
-                    <div class="card" style="border-left:3px solid var(--pink)">
-                        <span class="card-header">罗塞塔·战术建议</span>
-                        <div class="card-body">
-                            ${result.options.map(opt => `
-                                <div class="option-pill">
-                                    <span class="option-tag">${opt.tag}</span>
-                                    <div class="option-text">${opt.text}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            } catch (err) {
-                console.error(err);
-                output.innerHTML = `<div style="color:red; text-align:center; padding:20px;">分析失败。原因：${err.message}<br>请确保魔法已开启或 API Key 配置正确。</div>`;
-            }
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
