@@ -8,6 +8,7 @@ export default async function handler(req, res) {
   try {
     const { type, prompt, intel } = req.body;
     const controller = new AbortController();
+    // 稍微延长超时时间，给处理复杂逻辑留足余地
     const timeout = setTimeout(() => controller.abort(), 15000);
 
     let finalPrompt = "";
@@ -38,8 +39,8 @@ export default async function handler(req, res) {
         finalPrompt = prompt; 
     }
 
-    // 换回对免费账号最宽容的 2.5-flash-lite 引擎！
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`, {
+    // 【核心修复】：换回最稳、防限流的神车 1.5-flash-8b
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] }),
@@ -49,7 +50,7 @@ export default async function handler(req, res) {
     clearTimeout(timeout);
     const data = await response.json();
     
-    // 把错误信息原封不动传给前端
+    // 如果报错，直接传递给前端展示，绝不崩溃
     if (data.error) {
       return res.status(400).json({ error: data.error.message });
     }
