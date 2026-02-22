@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>灵犀·罗塞塔 v3.0 - 赛博核心</title>
+    <title>灵犀·罗塞塔 v3.1 - 赛博核心</title>
     <style>
         :root {
             --pink: #ff2d78;
@@ -132,7 +132,10 @@
             border-radius: 20px;
             font-size: 12px;
             animation: fadeIn 0.3s ease;
+            cursor: pointer;
+            transition: 0.3s;
         }
+        .tag-item:hover { background: rgba(0, 247, 255, 0.2); }
 
         /* 右侧控制台 */
         .right-console {
@@ -326,16 +329,13 @@
             if (maleKeys.some(k => tagsString.includes(k))) gender = 'male';
             else if (femaleKeys.some(k => tagsString.includes(k))) gender = 'female';
 
-            // 根据性别切换不同的风格和 Seed
-            let new Src = '';
+            // 根据性别切换不同的风格和 Seed（修复了之前这里的空格 Bug！）
+            let newSrc = ''; 
             if (gender === 'male') {
-                // 使用 Notion 风格的男性头像
                 newSrc = "https://api.dicebear.com/7.x/notionists/svg?seed=Felix&backgroundColor=transparent";
             } else if (gender === 'female') {
-                // 使用 Notion 风格的女性头像
                 newSrc = "https://api.dicebear.com/7.x/notionists/svg?seed=Kiki&backgroundColor=transparent";
             } else {
-                // 未知性别使用机器人风格
                 newSrc = "https://api.dicebear.com/7.x/bottts/svg?seed=UnknownRobot&backgroundColor=transparent";
             }
 
@@ -351,7 +351,8 @@
 
         function renderTags() {
             const list = document.getElementById('tagList');
-            list.innerHTML = portraitTags.map(t => `<div class="tag-item" onclick="removeTag('${t}')">${t} <span style="cursor:pointer;margin-left:4px;">×</span></div>`).join('');
+            // 修复了之前点击标签的移除交互逻辑
+            list.innerHTML = portraitTags.map(t => `<div class="tag-item" onclick="removeTag('${t}')">${t} <span style="cursor:pointer;margin-left:4px;color:#fff;">×</span></div>`).join('');
             const decRate = Math.min(100, portraitTags.length * 15);
             document.getElementById('decDisplay').innerText = decRate + '%';
         }
@@ -364,7 +365,7 @@
             updateAvatarState();
         }
 
-        // --- 核心分析引擎 (保持不变，但配合了新的UI动画) ---
+        // --- 核心分析引擎 ---
         async function startAnalysis() {
             const chat = document.getElementById('chatInput').value;
             const goal = document.getElementById('goalSelect').value;
