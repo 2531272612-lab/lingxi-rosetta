@@ -7,20 +7,42 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="灵犀·罗塞塔">
     <link rel="apple-touch-icon" href="https://api.dicebear.com/7.x/bottts/svg?seed=RosettaV5&backgroundColor=0a0b12">
-    <title>灵犀·罗塞塔 v5.0 - 迷雾雷达版</title>
+    <title>灵犀·罗塞塔 v5.1 - 完整装甲版</title>
     <style>
-        :root { --pink: #ff2d78; --cyan: #00f7ff; --bg-dark: #0a0b12; --glass-bg: rgba(20, 25, 40, 0.6); --glass-border: 1px solid rgba(255, 255, 255, 0.08); --text-primary: #e0e6ff; --text-secondary: #8a94b8; }
-        body { margin: 0; background-color: var(--bg-dark); background-image: radial-gradient(circle at 10% 20%, rgba(0, 247, 255, 0.1) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(255, 45, 120, 0.1) 0%, transparent 40%); color: var(--text-primary); font-family: "PingFang SC", "Helvetica Neue", sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        :root { 
+            --pink: #ff2d78; 
+            --cyan: #00f7ff; 
+            --bg-dark: #0a0b12; 
+            --glass-bg: rgba(20, 25, 40, 0.6); 
+            --glass-border: 1px solid rgba(255, 255, 255, 0.08); 
+            --text-primary: #e0e6ff; 
+            --text-secondary: #8a94b8; 
+        }
+        body { 
+            margin: 0; 
+            background-color: var(--bg-dark); 
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 247, 255, 0.1) 0%, transparent 40%), 
+                radial-gradient(circle at 90% 80%, rgba(255, 45, 120, 0.1) 0%, transparent 40%); 
+            color: var(--text-primary); 
+            font-family: "PingFang SC", "Helvetica Neue", sans-serif; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
         .section-label { font-size: 10px; color: var(--cyan); letter-spacing: 2px; margin-bottom: 12px; display: block; text-transform: uppercase; opacity: 0.8; }
-        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+        ::-webkit-scrollbar { width: 4px; } 
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
+        /* 左侧区域 */
         .left-radar { width: 38%; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); background: linear-gradient(180deg, rgba(10,11,18,0.8) 0%, rgba(0,0,0,0.4) 100%); overflow-y: auto; }
         .avatar-zone { flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; gap: 10px; padding: 40px 0 20px 0; }
         
         .stat-badge { text-align: center; z-index: 2; }
         .stat-cn { font-size: 13px; font-weight: 600; color: var(--text-primary); letter-spacing: 2px;}
         .stat-value { font-size: 26px; font-weight: 800; margin-top: 3px; text-shadow: 0 0 10px currentColor; }
-        .stat-top { color: var(--pink); } .stat-bottom { color: var(--cyan); }
+        .stat-top { color: var(--pink); } 
+        .stat-bottom { color: var(--cyan); }
         .avatar-image { width: 140px; height: 180px; object-fit: contain; filter: drop-shadow(0 0 15px rgba(0, 247, 255, 0.15)); z-index: 2; }
         
         .profile-summary { z-index: 2; font-size: 12px; color: var(--cyan); text-align: center; max-width: 85%; line-height: 1.6; background: rgba(0,247,255,0.05); padding: 10px; border-radius: 8px; border: 1px dashed rgba(0,247,255,0.2); }
@@ -33,6 +55,7 @@
         .radar-bar-fill { height: 100%; background: var(--cyan); transition: width 0.5s ease; box-shadow: 0 0 8px var(--cyan); }
         .radar-fog { font-size: 10px; color: #555; font-style: italic; letter-spacing: 1px; padding: 4px 0; border-bottom: 1px dashed #333; }
 
+        /* 情报录入舱 */
         .info-zone { flex-shrink: 0; padding: 25px; background: rgba(0,0,0,0.2); border-top: var(--glass-border); display: flex; flex-direction: column; }
         .intel-area { width: 100%; height: 60px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 12px; font-size: 13px; outline: none; border-radius: 8px; resize: none; box-sizing: border-box; }
         .btn-submit { margin-top: 10px; background: transparent; border: 1px solid var(--text-secondary); color: var(--text-secondary); padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: 0.3s; width: 100%; }
@@ -42,10 +65,11 @@
         .ai-tag { background: rgba(0, 247, 255, 0.05); border: 1px solid rgba(0,247,255,0.2); color: var(--cyan); padding: 3px 8px; border-radius: 4px; font-size: 10px; }
         .raw-intel-list { margin-top: 15px; font-size: 11px; color: var(--text-secondary); height: 100px; overflow-y: auto; }
 
+        /* 右侧控制台 */
         .right-console { width: 62%; display: flex; flex-direction: column; padding: 30px; overflow-y: auto; }
         .chat-area { width: 100%; height: 110px; background: rgba(255,255,255,0.02); border: var(--glass-border); color: var(--text-primary); padding: 18px; border-radius: 12px; resize: none; font-size: 15px; line-height: 1.6; box-sizing: border-box; outline: none; }
         .controls { display: flex; gap: 15px; align-items: center; margin-top: 20px; }
-        select { background: var(--glass-bg); border: var(--glass-border); color: var(--text-primary); padding: 10px; border-radius: 8px; flex: 1; }
+        select { background: var(--glass-bg); border: var(--glass-border); color: var(--text-primary); padding: 10px; border-radius: 8px; flex: 1; outline: none;}
         .btn-run { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); padding: 10px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn-run:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px rgba(0, 247, 255, 0.3); }
 
@@ -54,9 +78,10 @@
         .card-header { font-size: 10px; color: var(--text-secondary); letter-spacing: 1px; margin-bottom: 12px; display: block; }
         .option-pill { position: relative; background: rgba(255, 45, 120, 0.05); border-left: 2px solid var(--pink); padding: 15px; margin-top: 10px; border-radius: 4px; }
         .btn-copy { position: absolute; right: 10px; top: 10px; font-size: 10px; background: transparent; border: 1px solid var(--pink); color: var(--pink); padding: 2px 8px; border-radius: 4px; cursor: pointer; }
-        
-        /* 反应预测块 */
         .prediction-block { font-size: 11px; color: #8a94b8; margin-top: 10px; border-top: 1px dashed rgba(255,45,120,0.2); padding-top: 8px; }
+        
+        /* 报错信息框样式 */
+        .error-box { color: var(--pink); background: rgba(255, 45, 120, 0.05); border: 1px solid var(--pink); padding: 15px; border-radius: 8px; font-size: 13px; line-height: 1.5;}
 
         @media (max-width: 768px) { body { flex-direction: column; overflow-y: auto; } .left-radar, .right-console { width: 100%; height: auto; } }
     </style>
@@ -84,6 +109,7 @@
             <span class="section-label">碎片情报录入</span>
             <textarea class="intel-area" id="intelInput" placeholder="> 录入观察到的细节、朋友圈、行为表现..."></textarea>
             <button class="btn-submit" onclick="submitIntel()" id="btnSubmitIntel">启动临床心理侧写 >> </button>
+            <div id="intelError" style="margin-top: 10px;"></div>
             <div class="ai-tag-list" id="aiTagList"></div>
             <div class="raw-intel-list" id="rawIntelList"></div>
             <div style="text-align:right; font-size:10px; margin-top:10px; color:var(--pink); cursor:pointer;" onclick="clearIntel()">[销毁档案]</div>
@@ -114,13 +140,25 @@
 
         window.onload = () => { renderIntelUI(); updateAvatarState(); };
 
-        function clearIntel() { if(confirm("销毁所有档案？")) { intelHistory = []; aiProfile = { tags: [], decoding_rate: 0, summary: "等待情报投递...", radar: {} }; localStorage.clear(); location.reload(); } }
+        function clearIntel() { 
+            if(confirm("销毁所有档案？")) { 
+                intelHistory = []; 
+                aiProfile = { tags: [], decoding_rate: 0, summary: "等待情报投递...", radar: {} }; 
+                localStorage.clear(); 
+                location.reload(); 
+            } 
+        }
 
         async function submitIntel() {
             const text = document.getElementById('intelInput').value.trim();
             if (!text) return;
+            
             const btn = document.getElementById('btnSubmitIntel');
+            const errorDiv = document.getElementById('intelError');
+            
             btn.innerText = "正在拨开战争迷雾...";
+            errorDiv.innerHTML = ''; // 清除之前的报错
+            
             intelHistory.push(text);
             localStorage.setItem('lingxi_intel', JSON.stringify(intelHistory));
             document.getElementById('intelInput').value = '';
@@ -131,12 +169,28 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: 'profile', intel: intelHistory }) 
                 });
+                
                 const data = await response.json();
-                aiProfile = JSON.parse(data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim());
+                
+                // 【核心修复】：找回了丢失的“安全气囊”！
+                if (data.error) throw new Error(data.error);
+                if (!data.candidates || data.candidates.length === 0) throw new Error("Google大脑未返回有效数据，请稍后重试。");
+                
+                const cleanJson = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+                aiProfile = JSON.parse(cleanJson);
                 localStorage.setItem('lingxi_profile', JSON.stringify(aiProfile));
-                renderIntelUI(); updateAvatarState();
-            } catch (err) { alert("侧写中断: " + err.message); }
-            finally { btn.innerText = "启动临床心理侧写 >>"; }
+                
+                renderIntelUI(); 
+                updateAvatarState();
+            } catch (err) { 
+                // 优雅地展示报错，不再直接崩溃
+                errorDiv.innerHTML = `<div class="error-box">侧写中断: ${err.message}</div>`;
+                // 既然侧写失败了，把刚才加进去的情报弹出来，免得丢了
+                intelHistory.pop();
+                localStorage.setItem('lingxi_intel', JSON.stringify(intelHistory));
+            } finally { 
+                btn.innerText = "启动临床心理侧写 >>"; 
+            }
         }
 
         function renderIntelUI() {
@@ -145,7 +199,6 @@
             document.getElementById('aiTagList').innerHTML = aiProfile.tags.map(t => `<div class="ai-tag">${t}</div>`).join('');
             document.getElementById('rawIntelList').innerHTML = intelHistory.map(i => `<div>> ${i}</div>`).join('');
             
-            // 渲染战争迷雾雷达
             const radarBox = document.getElementById('radarBox');
             if (Object.keys(aiProfile.radar || {}).length > 0) {
                 radarBox.innerHTML = Object.entries(aiProfile.radar).map(([key, val]) => {
@@ -176,7 +229,7 @@
         function copyText(btn, text) {
             navigator.clipboard.writeText(text).then(() => {
                 btn.innerText = '已复制';
-                setTimeout(() => btn.innerText = '复制文本', 2000);
+                setTimeout(() => btn.innerText = '复制', 2000);
             });
         }
 
@@ -184,10 +237,11 @@
             const chat = document.getElementById('chatInput').value;
             const goal = document.getElementById('goalSelect').value;
             const output = document.getElementById('output');
-            if(!chat) return;
+            
+            if(!chat) return alert("请输入对话内容！");
+            
             output.innerHTML = `<div style="text-align:center; color:var(--cyan); margin-top:40px;">[ 调用临床心理模型进行破译中... ]</div>`;
 
-            // 【核心重构：金刚手段与菩萨心肠】
             const fullPrompt = `你现在是顶尖的心理学家和高情商社交大师。
             [目标深度侧写档案]：${aiProfile.summary} | 核心标签：${aiProfile.tags.join(',')}
             [当前对话]：${chat}
@@ -216,8 +270,16 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: 'chat', prompt: fullPrompt }) 
                 });
+                
                 const data = await response.json();
-                const result = JSON.parse(data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim());
+                
+                // 【核心修复】：找回了丢失的“安全气囊”！
+                if (data.error) throw new Error(data.error);
+                if (!data.candidates || data.candidates.length === 0) throw new Error("Google大脑未返回有效数据，请稍后重试。");
+
+                const cleanJson = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+                const result = JSON.parse(cleanJson);
+                
                 currentAff = Math.min(100, Math.max(0, currentAff + result.aff_change));
                 document.getElementById('affDisplay').innerText = currentAff + '%';
                 
@@ -238,7 +300,10 @@
                         `).join('')}
                     </div>
                 `;
-            } catch (err) { output.innerHTML = `<div class="card" style="color:red">破译失败：${err.message}</div>`; }
+            } catch (err) { 
+                // 优雅展示报错
+                output.innerHTML = `<div class="error-box">破译失败：${err.message}</div>`; 
+            }
         }
     </script>
 </body>
