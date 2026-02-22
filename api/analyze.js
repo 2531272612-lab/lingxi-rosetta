@@ -5,36 +5,37 @@ export default async function handler(req, res) {
   try {
     const { type, prompt, intel } = req.body;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     let finalPrompt = "";
 
-    // 【新增架构】如果是情报侧写模式
+    // 模式一：【战争迷雾侧写引擎】
     if (type === "profile") {
-        finalPrompt = `你现在是顶尖的心理学和人物侧写专家“罗塞塔”。
-        [当前收集到的全部碎片情报汇总]：${intel.join(' | ')}
+        finalPrompt = `你现在是顶尖的临床心理学家和FBI行为侧写师。
+        [情报档案]：${intel.join(' | ')}
         
-        任务：根据这些长短不一、可能矛盾的情报，进行深度人物侧写。
+        任务：基于情报进行多维深度侧写。
         请严格按JSON格式返回：
         {
-          "tags": ["特征1", "特征2", "潜在心理", "外在表现", "性别(若能推测)"],
-          "decoding_rate": 25, 
-          "summary": "简短的一句话人物侧写结论（如：一个外表高冷但内心极度缺乏安全感的慢热型人格）"
+          "tags": ["核心标签1", "防御机制", "依恋倾向"],
+          "decoding_rate": 20, 
+          "summary": "专业临床视角的简练人物定性",
+          "radar": {
+            "开放与接受度": 80,
+            "情绪稳定性": null,
+            "心理防御机制": null,
+            "人际依恋类型": null,
+            "核心社交动机": null
+          }
         }
-        
-        【解码率(decoding_rate)打分极其严格的规则(0-100)】：
-        - 只有性别或模糊的只言片语：0%-10%
-        - 有具体的喜好、职业或单次行为：15%-30%
-        - 有深度社交表现、朋友圈细节、能看出性格矛盾点：35%-60%
-        - 极度详尽的生活切片、价值观展现：70%以上
-        请注意：人是复杂矛盾的，情报越多、维度越深，分数才能给高。如果情报很肤浅，务必给低分！不要轻易给出高分！`;
+        【极度严格的迷雾规则】：radar中的5个维度，分值为0-100。但是！如果没有明确的情报证据支撑某个维度，绝对不许瞎猜！必须严格返回 null（代表该区域处于战争迷雾中）。`;
     } 
-    // 原有的聊天破译模式
+    // 模式二：【金刚菩萨破译引擎】
     else {
         finalPrompt = prompt; 
     }
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] }),
@@ -43,10 +44,8 @@ export default async function handler(req, res) {
 
     clearTimeout(timeout);
     const data = await response.json();
-    if (data.error) return res.status(400).json({ error: `Google 报错: ${data.error.message}` });
-
     return res.status(200).json(data);
   } catch (err) {
-    return res.status(500).json({ error: "连接超时或内部错误: " + err.message });
+    return res.status(500).json({ error: err.message });
   }
 }
