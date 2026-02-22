@@ -8,7 +8,6 @@ export default async function handler(req, res) {
   try {
     const { type, prompt, intel } = req.body;
     const controller = new AbortController();
-    // 稍微延长超时时间，给处理复杂逻辑留足余地
     const timeout = setTimeout(() => controller.abort(), 15000);
 
     let finalPrompt = "";
@@ -39,8 +38,8 @@ export default async function handler(req, res) {
         finalPrompt = prompt; 
     }
 
-    // 【核心修复】：换回最稳、防限流的神车 1.5-flash-8b
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=${apiKey}`, {
+    // 【核心修复】：使用官方目前支持的低延迟模型 gemini-2.0-flash-lite
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] }),
@@ -50,8 +49,13 @@ export default async function handler(req, res) {
     clearTimeout(timeout);
     const data = await response.json();
     
-    // 如果报错，直接传递给前端展示，绝不崩溃
+    // 【优雅的错误拦截机制】
     if (data.error) {
+      // 识别到 429 限流或者 Quota 超额错误
+      if (data.error.code === 429 || (data.error.message && data.error.message.includes('Quota'))) {
+        return res.status(429).json({ error: "Google 免费接口防刷机制触发：您操作太快啦（限制为 20次/分钟）。请放下 iPad，倒数 60 秒后再点击测试！" });
+      }
+      // 其他未知错误
       return res.status(400).json({ error: data.error.message });
     }
     
