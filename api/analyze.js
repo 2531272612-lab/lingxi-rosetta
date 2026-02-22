@@ -1,6 +1,9 @@
 export default async function handler(req, res) {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey.length < 10) return res.status(500).json({ error: "API Key 缺失" });
+  
+  if (!apiKey || apiKey.length < 10) {
+    return res.status(500).json({ error: "环境变量中没有找到有效的 API Key" });
+  }
 
   try {
     const { type, prompt, intel } = req.body;
@@ -35,7 +38,8 @@ export default async function handler(req, res) {
         finalPrompt = prompt; 
     }
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    // 换回对免费账号最宽容的 2.5-flash-lite 引擎！
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] }),
@@ -44,8 +48,14 @@ export default async function handler(req, res) {
 
     clearTimeout(timeout);
     const data = await response.json();
+    
+    // 把错误信息原封不动传给前端
+    if (data.error) {
+      return res.status(400).json({ error: data.error.message });
+    }
+    
     return res.status(200).json(data);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: "连接超时或内部错误: " + err.message });
   }
 }
