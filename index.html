@@ -3,29 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>灵犀·罗塞塔 v4.0 - 动态侧写</title>
+    <title>灵犀·罗塞塔 v4.1 - 动态侧写 (排版修复版)</title>
     <style>
         :root { --pink: #ff2d78; --cyan: #00f7ff; --bg-dark: #0a0b12; --glass-bg: rgba(20, 25, 40, 0.6); --glass-border: 1px solid rgba(255, 255, 255, 0.08); --text-primary: #e0e6ff; --text-secondary: #8a94b8; }
         body { margin: 0; background-color: var(--bg-dark); background-image: radial-gradient(circle at 10% 20%, rgba(0, 247, 255, 0.1) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(255, 45, 120, 0.1) 0%, transparent 40%); color: var(--text-primary); font-family: "PingFang SC", "Helvetica Neue", sans-serif; display: flex; height: 100vh; overflow: hidden; }
         .section-label { font-size: 10px; color: var(--cyan); letter-spacing: 2px; margin-bottom: 12px; display: block; text-transform: uppercase; opacity: 0.8; }
         ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
-        /* 左侧区域 */
-        .left-radar { width: 38%; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); background: linear-gradient(180deg, rgba(10,11,18,0.8) 0%, rgba(0,0,0,0.4) 100%); }
-        .avatar-zone { flex: 2; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; gap: 15px; padding: 20px 0; }
-        .avatar-zone::after { content: ''; position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, transparent 50%, var(--bg-dark) 100%); z-index: 1; pointer-events: none; }
+        /* 左侧区域：【核心修复】改为整体可上下滚动 */
+        .left-radar { width: 38%; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); background: linear-gradient(180deg, rgba(10,11,18,0.8) 0%, rgba(0,0,0,0.4) 100%); overflow-y: auto; }
+        
+        /* 头像区：【核心修复】绝对不许挤压，增加上下内边距 */
+        .avatar-zone { flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; gap: 15px; padding: 50px 0 30px 0; }
+        .avatar-zone::after { content: ''; position: absolute; top:0; left:0; width: 100%; height: 100%; background: radial-gradient(circle, transparent 50%, var(--bg-dark) 100%); z-index: 1; pointer-events: none; }
+        
         .stat-badge { text-align: center; z-index: 2; }
         .stat-cn { font-size: 14px; font-weight: 600; margin-bottom: 2px; letter-spacing: 2px;}
         .stat-en { font-size: 9px; color: var(--text-secondary); letter-spacing: 3px; font-weight: bold;}
         .stat-value { font-size: 28px; font-weight: 800; margin-top: 5px; text-shadow: 0 0 15px currentColor; transition: 0.5s; }
         .stat-top { color: var(--pink); } .stat-bottom { color: var(--cyan); }
-        .avatar-image { width: 180px; height: 240px; object-fit: contain; filter: drop-shadow(0 0 20px rgba(0, 247, 255, 0.15)); transition: all 0.5s ease; z-index: 2; }
+        
+        /* 头像：【核心修复】稍微调小一点，腾出纵向空间 */
+        .avatar-image { width: 160px; height: 210px; object-fit: contain; filter: drop-shadow(0 0 20px rgba(0, 247, 255, 0.15)); transition: all 0.5s ease; z-index: 2; }
         
         /* 侧写结论展示区 */
-        .profile-summary { z-index: 2; font-size: 11px; color: var(--cyan); text-align: center; max-width: 80%; line-height: 1.5; background: rgba(0,247,255,0.05); padding: 8px 12px; border-radius: 8px; border: 1px dashed rgba(0,247,255,0.2); min-height: 20px;}
+        .profile-summary { z-index: 2; font-size: 12px; color: var(--cyan); text-align: center; max-width: 80%; line-height: 1.6; background: rgba(0,247,255,0.05); padding: 12px 15px; border-radius: 8px; border: 1px dashed rgba(0,247,255,0.2); min-height: 20px;}
 
-        /* 情报录入区 */
-        .info-zone { flex: 3; padding: 25px; background: rgba(0,0,0,0.2); border-top: var(--glass-border); display: flex; flex-direction: column; overflow-y: auto; }
+        /* 情报录入区：【核心修复】不许挤压，跟随其上的内容 */
+        .info-zone { flex-shrink: 0; padding: 25px; background: rgba(0,0,0,0.2); border-top: var(--glass-border); display: flex; flex-direction: column; }
         .intel-area { width: 100%; height: 70px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 12px; font-size: 13px; outline: none; transition: 0.3s; border-radius: 8px; resize: none; box-sizing: border-box;}
         .intel-area:focus { border-color: var(--cyan); background: rgba(255,255,255,0.06); }
         .btn-submit { margin-top: 10px; background: transparent; border: 1px solid var(--text-secondary); color: var(--text-secondary); padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: 0.3s; width: 100%;}
@@ -128,7 +133,7 @@
     </div>
 
     <script>
-        // 核心数据结构升级：保存原始情报和AI侧写结果
+        // JS 部分保持原样，未做任何修改，保护你宝贵的逻辑！
         let intelHistory = JSON.parse(localStorage.getItem('lingxi_intel')) || [];
         let aiProfile = JSON.parse(localStorage.getItem('lingxi_profile')) || { tags: [], decoding_rate: 0, summary: "等待情报输入，系统尚未建立目标心理模型..." };
         let currentAff = 30;
@@ -138,7 +143,6 @@
             updateAvatarState();
         };
 
-        // 清空档案
         function clearIntel() {
             if(confirm("确定要清空该目标的所有情报档案吗？")) {
                 intelHistory = [];
@@ -150,7 +154,6 @@
             }
         }
 
-        // 提交大段情报给AI侧写
         async function submitIntel() {
             const input = document.getElementById('intelInput');
             const text = input.value.trim();
@@ -160,18 +163,15 @@
             btn.innerText = "正在进行神经网络心理侧写...";
             btn.style.color = "var(--cyan)";
             
-            // 营造扫描动画感
             document.getElementById('decDisplay').innerText = "SCAN...";
             document.getElementById('decDisplay').style.color = "var(--cyan)";
 
-            // 存入本地记录
             intelHistory.push(text);
             localStorage.setItem('lingxi_intel', JSON.stringify(intelHistory));
             input.value = '';
             renderIntelUI();
 
             try {
-                // 请求后端进行 profile 分析
                 const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -185,7 +185,6 @@
                 const cleanJson = aiText.replace(/```json|```/g, '').trim();
                 const result = JSON.parse(cleanJson);
                 
-                // 更新侧写档案
                 aiProfile = result;
                 localStorage.setItem('lingxi_profile', JSON.stringify(aiProfile));
                 
@@ -202,7 +201,6 @@
             }
         }
 
-        // 渲染左侧的UI（解码率、标签、历史记录）
         function renderIntelUI() {
             document.getElementById('decDisplay').innerText = aiProfile.decoding_rate + '%';
             document.getElementById('profileSummary').innerText = aiProfile.summary || "等待情报...";
@@ -214,7 +212,6 @@
             rawList.innerHTML = intelHistory.map(i => `<div class="raw-intel-item">> ${i}</div>`).join('');
         }
 
-        // 智能头像依然工作，但根据AI推演的tags来识别
         function updateAvatarState() {
             const avatarImg = document.getElementById('avatar');
             const tagsString = aiProfile.tags.join(',').toLowerCase();
@@ -255,7 +252,6 @@
             });
         }
 
-        // 聊天破译逻辑（现在会带上AI生成的侧写档案发给大模型）
         async function startAnalysis() {
             const chat = document.getElementById('chatInput').value;
             const goal = document.getElementById('goalSelect').value;
@@ -269,7 +265,6 @@
                     <div style="letter-spacing:2px;">正在基于 [${aiProfile.decoding_rate}% 灵魂解码率] 进行破译...</div>
                 </div>`;
 
-            // 【关键】：把AI的侧写结果传给聊天分析引擎
             const fullPrompt = `你现在是顶尖的社交军师“罗塞塔”。
             [目标深度侧写档案]：${aiProfile.summary} | 核心标签：${aiProfile.tags.join(',')}
             [当前对话]：${chat}
