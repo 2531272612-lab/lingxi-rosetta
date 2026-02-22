@@ -99,32 +99,62 @@
     <script>
     // ...之前的代码保持不变...
     async function startAnalysis() {
-    // ...前面的获取内容逻辑不变...
-    output.innerHTML = `<div style="text-align:center; color:var(--cyan);">信号发射中... 请保持网络稳定</div>`;
+    const chat = document.getElementById('chatInput').value;
+    const goal = document.getElementById('goalSelect').value;
+    const output = document.getElementById('output');
+    
+    if(!chat) return alert("请输入内容");
+
+    output.innerHTML = `<div style="text-align:center; color:var(--cyan);">正在呼叫云端大脑...</div>`;
+
+    // --- 刚才漏掉的就是这几行定义 fullPrompt 的代码 ---
+    const fullPrompt = `你现在是社交分析引擎“罗塞塔”。
+    [当前对话]：${chat}
+    [用户目标]：${goal}
+    任务：分析对方潜台词，给出好感度变化(-10到10)和两个回复选项。
+    必须严格返回JSON格式：{"inference": "...", "aff_change": 5, "options": [{"tag": "方向", "text": "..."}]}`;
 
     try {
         const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: fullPrompt })
+            body: JSON.stringify({ prompt: fullPrompt }) // 现在 fullPrompt 找到了！
         });
 
         const data = await response.json();
 
-        // 如果后端传回了错误
-        if (data.error) {
-            throw new Error(data.error);
-        }
+        if (data.error) throw new Error(data.error);
 
-        // 正常解析数据 (此处代码同前)
+        // 解析 AI 返回的文本
         const aiText = data.candidates[0].content.parts[0].text;
-        // ...后续渲染逻辑...
-
+        const cleanJson = aiText.replace(/```json|```/g, '').trim();
+        const result = JSON.parse(cleanJson);
+        
+        // 更新界面
+        currentAff += result.aff_change;
+        document.getElementById('affDisplay').innerText = currentAff + '%';
+        
+        output.innerHTML = `
+            <div class="card">
+                <span class="card-header">灵犀·推演报告</span>
+                <div class="card-body">${result.inference}</div>
+            </div>
+            <div class="card" style="border-left:3px solid var(--pink)">
+                <span class="card-header">战术建议</span>
+                <div class="card-body">
+                    ${result.options.map(opt => `
+                        <div class="option-pill">
+                            <span class="option-tag">${opt.tag}</span>
+                            <div class="option-text">${opt.text}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
     } catch (err) {
         output.innerHTML = `<div style="color:red; padding:20px; border:1px solid red; border-radius:8px;">
             分析失败！<br>
-            [故障代码]：${err.message}<br><br>
-            <small>提示：如果是“Google 报错: API key not valid”，说明 Key 确实错了。</small>
+            [故障代码]：${err.message}
         </div>`;
     }
 }
