@@ -2,50 +2,55 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>灵犀·罗塞塔 v2.1 - 实战全能版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>灵犀·罗塞塔 v2.2 - 旗舰版</title>
     <style>
         :root { --pink: #ff4d94; --cyan: #00f2ff; --bg: #07080a; --panel: rgba(20, 25, 35, 0.7); }
         body { margin: 0; background: var(--bg); color: #e0e0e0; font-family: "PingFang SC", sans-serif; display: flex; height: 100vh; overflow: hidden; }
         
-        /* 布局：左(35%) 右(65%) */
+        /* 布局控制 */
         .left-radar { width: 35%; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.1); background: radial-gradient(circle at 50% 50%, #1a1c2c 0%, var(--bg) 100%); }
         .right-console { width: 65%; display: flex; flex-direction: column; padding: 30px; overflow-y: auto; }
 
         /* 灵犀视觉区 */
-        .avatar-zone { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; min-height: 450px; }
+        .avatar-zone { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; min-height: 400px; }
         .avatar-group { display: flex; flex-direction: column; align-items: center; transform: scale(0.9); position: relative; }
         .stat-badge { position: absolute; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; width: 140px; z-index: 20; }
-        .stat-cn { font-size: 20px; font-weight: bold; margin-bottom: 2px; }
-        .stat-en { width: 100%; font-size: 8px; color: #777; display: flex; justify-content: space-between; font-weight: bold; }
-        .stat-value { font-size: 26px; font-weight: bold; margin-top: 4px; color: #fff; }
-        .stat-top { top: -85px; } .stat-top .stat-cn { color: var(--pink); letter-spacing: 4px; }
-        .stat-bottom { bottom: -95px; } .stat-bottom .stat-cn { color: var(--cyan); letter-spacing: 2px; }
-        .avatar-image { width: 220px; height: 320px; object-fit: contain; filter: drop-shadow(0 0 15px rgba(255, 77, 148, 0.2)); transition: 0.5s; }
+        .stat-cn { font-size: 18px; font-weight: bold; margin-bottom: 2px; }
+        .stat-en { width: 100%; font-size: 8px; color: #777; display: flex; justify-content: space-between; font-weight: bold; letter-spacing: 1px; }
+        .stat-value { font-size: 24px; font-weight: bold; margin-top: 4px; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .stat-top { top: -80px; } .stat-top .stat-cn { color: var(--pink); letter-spacing: 4px; }
+        .stat-bottom { bottom: -80px; } .stat-bottom .stat-cn { color: var(--cyan); letter-spacing: 2px; }
+        .avatar-image { width: 220px; height: 320px; object-fit: contain; filter: drop-shadow(0 0 15px rgba(255, 77, 148, 0.2)); }
 
-        /* 情报录入区 */
-        .info-zone { padding: 20px; background: rgba(0,0,0,0.3); border-top: 1px solid #222; max-height: 300px; overflow-y: auto; }
-        .section-label { font-size: 11px; color: var(--cyan); letter-spacing: 2px; margin-bottom: 10px; display: block; }
-        .tag-input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; margin-bottom: 12px; box-sizing: border-box; }
+        /* 情报区 */
+        .info-zone { padding: 20px; background: rgba(0,0,0,0.3); border-top: 1px solid #222; max-height: 250px; overflow-y: auto; }
+        .section-label { font-size: 10px; color: var(--cyan); letter-spacing: 2px; margin-bottom: 10px; display: block; text-transform: uppercase; }
+        .tag-input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; margin-bottom: 12px; box-sizing: border-box; outline: none; }
+        .tag-input:focus { border-color: var(--cyan); }
         .tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
         .tag-item { background: rgba(0,242,255,0.1); border: 1px solid var(--cyan); color: var(--cyan); padding: 4px 10px; border-radius: 15px; font-size: 11px; }
 
-        /* 操作台 */
-        .input-box { margin-bottom: 25px; }
-        .chat-area { width: 100%; height: 100px; background: #0c0d11; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 12px; resize: none; font-size: 15px; box-sizing: border-box; }
-        .controls { display: flex; gap: 15px; margin-top: 15px; align-items: center; }
-        .btn-run { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-run:hover { background: var(--cyan); color: #000; }
-        select { background: #111; border: 1px solid #444; color: #ccc; padding: 10px; border-radius: 8px; }
+        /* 右侧操作区 */
+        .chat-area { width: 100%; height: 120px; background: #0c0d11; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 12px; resize: none; font-size: 15px; box-sizing: border-box; line-height: 1.6; margin-bottom: 15px; }
+        .controls { display: flex; gap: 15px; align-items: center; margin-bottom: 25px; }
+        .btn-run { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); padding: 12px 35px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-run:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px rgba(0,242,255,0.2); }
+        select { background: #111; border: 1px solid #444; color: #ccc; padding: 10px; border-radius: 8px; outline: none; }
 
-        /* 分析结果流 */
+        /* 结果展示 */
         .output-flow { flex: 1; border-top: 1px solid #222; padding-top: 25px; }
-        .card { background: var(--panel); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; margin-bottom: 20px; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: var(--panel); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px); }
         .card-header { font-size: 11px; color: #666; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 8px; }
         .card-body { font-size: 15px; line-height: 1.7; color: #d0d0d0; }
         .option-pill { border-left: 3px solid var(--pink); background: rgba(255,77,148,0.05); padding: 15px; margin-top: 12px; border-radius: 0 8px 8px 0; }
         .option-tag { font-size: 10px; color: var(--pink); font-weight: bold; margin-bottom: 4px; display: block; }
+
+        @media (max-aspect-ratio: 1/1) {
+            body { flex-direction: column; overflow-y: auto; }
+            .left-radar, .right-console { width: 100%; height: auto; }
+            .left-radar { border-right: none; border-bottom: 1px solid #222; padding-bottom: 40px; }
+        }
     </style>
 </head>
 <body>
@@ -67,16 +72,16 @@
             </div>
         </div>
         <div class="info-zone">
-            <span class="section-label">LINGXI DATA / 人物情报实时录入</span>
-            <input type="text" class="tag-input" id="tagIn" placeholder="输入已知碎片(如:性格冷淡,喜欢猫)按回车..." onkeypress="addTag(event)">
+            <span class="section-label">LINGXI DATA / 画像情报</span>
+            <input type="text" class="tag-input" id="tagIn" placeholder="录入性格/喜好/标签(按回车)..." onkeypress="addTag(event)">
             <div class="tag-list" id="tagList"></div>
         </div>
     </div>
 
     <div class="right-console">
         <div class="input-box">
-            <span class="section-label">ROSETTA INTERFACE / 聊天与目的</span>
-            <textarea id="chatInput" class="chat-area" placeholder="粘贴对方最后一段聊天内容..."></textarea>
+            <span class="section-label">ROSETTA INTERFACE / 聊天内容及目的</span>
+            <textarea id="chatInput" class="chat-area" placeholder="在此粘贴对方最后一段回复..."></textarea>
             <div class="controls">
                 <select id="goalSelect">
                     <option value="建立舒适感">建立舒适感</option>
@@ -88,19 +93,14 @@
             </div>
         </div>
         <div class="output-flow" id="output">
-            <div style="text-align:center; color:#333; margin-top:50px">[ 引擎待机中，请输入数据 ]</div>
+            <div style="text-align:center; color:#333; margin-top:50px">[ 引擎待机中 ]</div>
         </div>
     </div>
 
     <script>
-        // --- 核心配置：请填入你的 API KEY ---
-        const GEMINI_API_KEY = ''; 
-        const API_URL = '/api/analyze';
-
         let portraitTags = JSON.parse(localStorage.getItem('lingxi_tags')) || [];
         let currentAff = 30;
 
-        // 初始化加载数据
         window.onload = () => renderTags();
 
         function addTag(e) {
@@ -125,27 +125,35 @@
             const output = document.getElementById('output');
             if(!chat) return alert("请输入内容");
 
-            output.innerHTML = `<div style="text-align:center; color:var(--cyan);">罗塞塔协议运行中... 正在访问云端大脑...</div>`;
+            output.innerHTML = `<div style="text-align:center; color:var(--cyan);">正在呼叫云端大脑，请稍候...</div>`;
 
-            const prompt = `你现在是社交引擎“罗塞塔”。
-            [对方画像]：${portraitTags.join(', ')}
+            const fullPrompt = `你现在是社交分析引擎“罗塞塔”。
+            [画像碎片]：${portraitTags.join(', ')}
             [当前对话]：${chat}
             [用户目标]：${goal}
-            请分析：
-            1. 适度推演对方此时的真实潜台词（结合画像）。
-            2. 给出当前好感度变化的数值建议（-10到+10）。
-            3. 给出两个非直男、有温度、符合目标的回复选项。
-            要求：JSON格式返回。格式如：{"inference": "...", "aff_change": 5, "options": [{"tag": "方向A", "text": "..."}]}`;
+            任务：
+            1. 结合画像推演对方此时的真实潜台词。
+            2. 给出好感度变化建议（-10到+10）。
+            3. 给出两个回复选项。
+            必须严格返回 JSON 格式：{"inference": "...", "aff_change": 5, "options": [{"tag": "方向", "text": "..."}]}`;
 
             try {
-                const response = await fetch(API_URL, {
+                // 核心：指向我们部署在 Vercel 的后端接口
+                const response = await fetch('/api/analyze', {
                     method: 'POST',
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: fullPrompt })
                 });
-                const data = await response.json();
-                const result = JSON.parse(data.candidates[0].content.parts[0].text.replace(/```json|```/g, ''));
+
+                if (!response.ok) throw new Error('后端响应异常');
                 
-                // 更新UI
+                const data = await response.json();
+                
+                // 解析 AI 返回的内容
+                let aiText = data.candidates[0].content.parts[0].text;
+                const cleanJson = aiText.replace(/```json|```/g, '').trim();
+                const result = JSON.parse(cleanJson);
+                
                 currentAff += result.aff_change;
                 document.getElementById('affDisplay').innerText = currentAff + '%';
                 
@@ -167,7 +175,8 @@
                     </div>
                 `;
             } catch (err) {
-                output.innerHTML = `<div style="color:red">分析失败。请检查API Key是否正确，或网络是否通畅。</div>`;
+                console.error(err);
+                output.innerHTML = `<div style="color:red; text-align:center; padding:20px;">分析失败。原因：${err.message}<br>请确保魔法已开启或 API Key 配置正确。</div>`;
             }
         }
     </script>
