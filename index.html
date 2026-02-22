@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>灵犀·罗塞塔 v3.1 - 赛博核心</title>
+    <title>灵犀·罗塞塔 v3.2 - 赛博核心</title>
     <style>
         :root {
             --pink: #ff2d78;
@@ -55,52 +55,45 @@
             border-right: 1px solid rgba(255,255,255,0.05);
             background: linear-gradient(180deg, rgba(10,11,18,0.8) 0%, rgba(0,0,0,0.4) 100%);
         }
+        
+        /* 彻底修复：采用 Flex 垂直堆叠布局，防止文字被切掉 */
         .avatar-zone {
             flex: 3;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             position: relative;
             overflow: hidden;
+            gap: 15px; /* 控制文字和头像的间距 */
+            padding: 20px 0;
         }
-        /* 动态扫描光圈 */
         .avatar-zone::after {
-            content: '';
-            position: absolute;
-            width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 50%, var(--bg-dark) 100%);
-            z-index: 1;
+            content: ''; position: absolute; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 50%, var(--bg-dark) 100%); z-index: 1; pointer-events: none;
         }
-        .avatar-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transform: scale(0.95);
+        
+        .stat-badge {
+            text-align: center;
             z-index: 2;
         }
-        .stat-badge {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            width: 160px;
-        }
-        .stat-cn { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-        .stat-en { font-size: 8px; color: var(--text-secondary); letter-spacing: 3px; }
+        .stat-cn { font-size: 14px; font-weight: 600; margin-bottom: 2px; letter-spacing: 2px;}
+        .stat-en { font-size: 9px; color: var(--text-secondary); letter-spacing: 3px; font-weight: bold;}
         .stat-value {
             font-size: 28px;
             font-weight: 800;
             margin-top: 5px;
             text-shadow: 0 0 15px currentColor;
         }
-        .stat-top { top: -90px; color: var(--pink); }
-        .stat-bottom { bottom: -90px; color: var(--cyan); }
+        .stat-top { color: var(--pink); }
+        .stat-bottom { color: var(--cyan); }
         
         .avatar-image {
-            width: 240px; height: 340px;
+            width: 200px; height: 280px;
             object-fit: contain;
             filter: drop-shadow(0 0 20px rgba(0, 247, 255, 0.15));
             transition: all 0.5s ease;
+            z-index: 2;
         }
 
         /* 情报录入区 */
@@ -112,137 +105,74 @@
             display: flex; flex-direction: column;
         }
         .tag-input {
-            width: 100%;
-            background: rgba(255,255,255,0.05);
-            border: none;
-            border-bottom: 2px solid rgba(255,255,255,0.1);
-            color: #fff;
-            padding: 12px 0;
-            font-size: 14px;
-            outline: none;
-            transition: 0.3s;
+            width: 100%; background: rgba(255,255,255,0.05); border: none; border-bottom: 2px solid rgba(255,255,255,0.1);
+            color: #fff; padding: 12px 0; font-size: 14px; outline: none; transition: 0.3s;
         }
         .tag-input:focus { border-bottom-color: var(--cyan); }
         .tag-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; overflow-y: auto; }
         .tag-item {
-            background: rgba(0, 247, 255, 0.08);
-            border: 1px solid var(--cyan);
-            color: var(--cyan);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            animation: fadeIn 0.3s ease;
-            cursor: pointer;
-            transition: 0.3s;
+            background: rgba(0, 247, 255, 0.08); border: 1px solid var(--cyan); color: var(--cyan);
+            padding: 6px 14px; border-radius: 20px; font-size: 12px; animation: fadeIn 0.3s ease; cursor: pointer; transition: 0.3s;
         }
         .tag-item:hover { background: rgba(0, 247, 255, 0.2); }
 
         /* 右侧控制台 */
-        .right-console {
-            width: 62%;
-            display: flex;
-            flex-direction: column;
-            padding: 30px;
-            overflow-y: auto;
-        }
+        .right-console { width: 62%; display: flex; flex-direction: column; padding: 30px; overflow-y: auto; }
         .input-box { margin-bottom: 30px; }
         .chat-area {
-            width: 100%; height: 120px;
-            background: rgba(255,255,255,0.03);
-            border: var(--glass-border);
-            color: var(--text-primary);
-            padding: 18px;
-            border-radius: 12px;
-            resize: none;
-            font-size: 15px;
-            line-height: 1.6;
-            box-sizing: border-box;
-            transition: 0.3s;
+            width: 100%; height: 120px; background: rgba(255,255,255,0.03); border: var(--glass-border);
+            color: var(--text-primary); padding: 18px; border-radius: 12px; resize: none; font-size: 15px;
+            line-height: 1.6; box-sizing: border-box; transition: 0.3s;
         }
         .chat-area:focus { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.2); outline: none; }
         
         .controls { display: flex; gap: 20px; align-items: center; margin-top: 20px; }
-        select {
-            background: var(--glass-bg);
-            border: var(--glass-border);
-            color: var(--text-primary);
-            padding: 12px 20px;
-            border-radius: 8px;
-            outline: none;
-            flex: 1;
-            cursor: pointer;
-        }
+        select { background: var(--glass-bg); border: var(--glass-border); color: var(--text-primary); padding: 12px 20px; border-radius: 8px; outline: none; flex: 1; cursor: pointer; }
         .btn-run {
-            background: transparent;
-            border: 1px solid var(--cyan);
-            color: var(--cyan);
-            padding: 12px 40px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
+            background: transparent; border: 1px solid var(--cyan); color: var(--cyan); padding: 12px 40px;
+            border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;
         }
-        .btn-run:hover {
-            background: var(--cyan);
-            color: #000;
-            box-shadow: 0 0 25px rgba(0, 247, 255, 0.4);
-        }
+        .btn-run:hover { background: var(--cyan); color: #000; box-shadow: 0 0 25px rgba(0, 247, 255, 0.4); }
 
         /* 结果输出区 */
         .output-flow { flex: 1; }
-        /* 结果卡片出现的动画 */
-        @keyframes slideUpFade {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .result-card {
-            animation: slideUpFade 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .result-card { animation: slideUpFade 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
         .card {
             background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;
+            padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-        .card-header {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            display: flex; align-items: center;
-        }
+        .card-header { font-size: 11px; color: var(--text-secondary); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; }
         .card-header::before { content:''; display:inline-block; width:8px; height:8px; background:currentColor; border-radius:50%; margin-right:8px; }
         .header-pink { color: var(--pink); }
         .header-cyan { color: var(--cyan); }
         
-        .card-body { font-size: 16px; line-height: 1.8; color: #d8e1f0; }
+        .card-body { font-size: 15px; line-height: 1.8; color: #d8e1f0; }
         
+        /* 复制按钮样式 */
         .option-pill {
-            background: rgba(255, 45, 120, 0.06);
-            border-left: 3px solid var(--pink);
-            padding: 18px;
-            margin-top: 15px;
-            border-radius: 0 12px 12px 0;
-            transition: 0.3s;
+            position: relative;
+            background: rgba(255, 45, 120, 0.06); border-left: 3px solid var(--pink);
+            padding: 18px; margin-top: 15px; border-radius: 0 12px 12px 0; transition: 0.3s;
         }
         .option-pill:hover { background: rgba(255, 45, 120, 0.12); transform: translateX(5px); }
-        .option-tag { font-size: 11px; color: var(--pink); font-weight: 700; margin-bottom: 6px; display: block; letter-spacing: 1px; }
+        .option-tag { font-size: 11px; color: var(--pink); font-weight: 700; margin-bottom: 8px; display: block; letter-spacing: 1px; }
+        .option-text { font-size: 15px; }
+        
+        .btn-copy {
+            position: absolute; right: 15px; top: 15px;
+            background: transparent; border: 1px solid rgba(255, 45, 120, 0.4);
+            color: var(--pink); padding: 4px 10px; border-radius: 6px;
+            font-size: 11px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-copy:hover { background: var(--pink); color: #fff; }
 
-        /* 移动端适配 */
         @media (max-width: 768px) {
             body { flex-direction: column; overflow-y: auto; height: auto; }
             .left-radar, .right-console { width: 100%; }
             .left-radar { height: auto; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
-            .avatar-zone { min-height: 300px; padding: 40px 0; }
-            .avatar-image { width: 180px; height: 260px; }
-            .stat-badge { transform: scale(0.9) translateX(-55%); }
+            .avatar-zone { padding: 30px 0; }
             .right-console { padding: 25px; }
         }
         @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
@@ -252,18 +182,18 @@
 
     <div class="left-radar">
         <div class="avatar-zone">
-            <div class="avatar-group">
-                <div class="stat-badge stat-top">
-                    <div class="stat-cn">好感度</div>
-                    <div class="stat-en">AFFECTION RATE</div>
-                    <div class="stat-value" id="affDisplay">30%</div>
-                </div>
-                <img class="avatar-image" id="avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Unknown&backgroundColor=transparent" alt="Avatar">
-                <div class="stat-badge stat-bottom">
-                    <div class="stat-cn">灵魂解码率</div>
-                    <div class="stat-en">DECODING LEVEL</div>
-                    <div class="stat-value" id="decDisplay">0%</div>
-                </div>
+            <div class="stat-badge stat-top">
+                <div class="stat-cn">好感度</div>
+                <div class="stat-en">AFFECTION RATE</div>
+                <div class="stat-value" id="affDisplay">30%</div>
+            </div>
+            
+            <img class="avatar-image" id="avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Unknown&backgroundColor=transparent" alt="Avatar">
+            
+            <div class="stat-badge stat-bottom">
+                <div class="stat-cn">灵魂解码率</div>
+                <div class="stat-en">DECODING LEVEL</div>
+                <div class="stat-value" id="decDisplay">0%</div>
             </div>
         </div>
         <div class="info-zone">
@@ -295,41 +225,35 @@
     </div>
 
     <script>
-        // --- 核心数据 ---
         let portraitTags = JSON.parse(localStorage.getItem('lingxi_tags')) || [];
         let currentAff = 30;
 
-        // --- 初始化 ---
         window.onload = () => {
             renderTags();
-            updateAvatarState(); // 启动时检查一次头像
+            updateAvatarState();
         };
 
-        // --- 交互逻辑 ---
         function addTag(e) {
             if (e.key === 'Enter' && e.target.value.trim()) {
                 portraitTags.push(e.target.value.trim());
                 localStorage.setItem('lingxi_tags', JSON.stringify(portraitTags));
                 e.target.value = '';
                 renderTags();
-                updateAvatarState(); // 每次添加标签后更新头像
+                updateAvatarState();
             }
         }
 
-        // 【新增功能】智能头像切换引擎
         function updateAvatarState() {
             const avatarImg = document.getElementById('avatar');
             const tagsString = portraitTags.join(',').toLowerCase();
             
-            // 性别关键词词库
-            const maleKeys = ['男', '先生', '小哥哥', '学长', '大叔', '弟弟', '兄'];
-            const femaleKeys = ['女', '女士', '小姐姐', '学姐', '阿姨', '妹妹', '姐', '少女'];
+            const maleKeys = ['男', '先生', '哥哥', '学长', '大叔', '弟弟', '兄'];
+            const femaleKeys = ['女', '女士', '姐姐', '学姐', '阿姨', '妹妹', '姐', '少女', '妹'];
 
             let gender = 'unknown';
             if (maleKeys.some(k => tagsString.includes(k))) gender = 'male';
             else if (femaleKeys.some(k => tagsString.includes(k))) gender = 'female';
 
-            // 根据性别切换不同的风格和 Seed（修复了之前这里的空格 Bug！）
             let newSrc = ''; 
             if (gender === 'male') {
                 newSrc = "https://api.dicebear.com/7.x/notionists/svg?seed=Felix&backgroundColor=transparent";
@@ -339,25 +263,22 @@
                 newSrc = "https://api.dicebear.com/7.x/bottts/svg?seed=UnknownRobot&backgroundColor=transparent";
             }
 
-            // 只有当图片源不一样时才更新，防止闪烁
             if (avatarImg.src !== newSrc) {
-                avatarImg.style.opacity = 0; // 先渐隐
+                avatarImg.style.opacity = 0; 
                 setTimeout(() => {
                     avatarImg.src = newSrc;
-                    avatarImg.style.opacity = 1; // 加载完渐显
+                    avatarImg.style.opacity = 1; 
                 }, 300);
             }
         }
 
         function renderTags() {
             const list = document.getElementById('tagList');
-            // 修复了之前点击标签的移除交互逻辑
             list.innerHTML = portraitTags.map(t => `<div class="tag-item" onclick="removeTag('${t}')">${t} <span style="cursor:pointer;margin-left:4px;color:#fff;">×</span></div>`).join('');
             const decRate = Math.min(100, portraitTags.length * 15);
             document.getElementById('decDisplay').innerText = decRate + '%';
         }
 
-        // 点击标签删除功能
         function removeTag(tagToRemove) {
             portraitTags = portraitTags.filter(t => t !== tagToRemove);
             localStorage.setItem('lingxi_tags', JSON.stringify(portraitTags));
@@ -365,7 +286,24 @@
             updateAvatarState();
         }
 
-        // --- 核心分析引擎 ---
+        // --- 复制功能逻辑 ---
+        function copyText(btn) {
+            // 找到同一个 option-pill 下的文字内容
+            const textDiv = btn.parentElement.querySelector('.option-text');
+            navigator.clipboard.writeText(textDiv.innerText).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = '✔ 已复制';
+                btn.style.background = 'var(--pink)';
+                btn.style.color = '#fff';
+                // 2秒后恢复原状
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = 'transparent';
+                    btn.style.color = 'var(--pink)';
+                }, 2000);
+            });
+        }
+
         async function startAnalysis() {
             const chat = document.getElementById('chatInput').value;
             const goal = document.getElementById('goalSelect').value;
@@ -373,19 +311,27 @@
             
             if(!chat) return alert(">>> 错误：未检测到对话输入 <<<");
 
-            // 加载时的动画效果
             output.innerHTML = `
                 <div style="text-align:center; color:var(--cyan); margin-top:50px;">
                     <div style="margin-bottom:15px; font-size:24px;">⚪ ⚪ ⚪</div>
                     <div style="letter-spacing:2px;">正在接入云端神经网络...</div>
                 </div>`;
 
-            const fullPrompt = `你现在是社交分析引擎“罗塞塔”。
+            // 【洗脑级 Prompt】严厉治愈 AI 的“机器味”和“二次元味”
+            const fullPrompt = `你现在是顶尖的社交/恋爱军师“罗塞塔”。
+            [对方画像]：${portraitTags.join(', ') || '未知'}
             [当前对话]：${chat}
-            [用户目标]：${goal}
-            [对方画像]：${portraitTags.join(', ')}
-            任务：分析对方潜台词，给出好感度变化(-10到10)和两个回复选项。
-            必须严格返回JSON格式：{"inference": "...", "aff_change": 5, "options": [{"tag": "方向", "text": "..."}]}`;
+            [我方战术目标]：${goal}
+            
+            请严格按JSON格式返回分析结果：
+            {"inference": "简明扼要的潜台词分析...", "aff_change": 5, "options": [{"tag": "战术思路，如: 化解试探", "text": "回复内容"}]}
+
+            【极其严格的语境要求——如果违规程序将崩溃】：
+            1. inference（推演报告）：禁止啰嗦！像特工一样，一针见血指出对方真实的心理活动、情绪状态和真实意图。
+            2. options（战术建议）：必须提供2个不同角度的回复。
+            3. 语气要求（最重要）：绝对禁止AI味！禁止像客服！禁止爹味说教！
+            4. 绝对禁止动作描写：回复中严禁出现括号加动作的网文风格（如“(带着玩味)”、“(轻笑)”等），只准输出纯对话文字。
+            5. 必须接地气：回复必须像真实的现代年轻人在微信上聊天，简短、自然、口语化、自带松弛感。可以高情商，但绝不能舔狗。不用过于热情。`;
 
             try {
                 const response = await fetch('/api/analyze', {
@@ -404,7 +350,6 @@
                 currentAff = Math.min(100, Math.max(0, currentAff + result.aff_change));
                 document.getElementById('affDisplay').innerText = currentAff + '%';
                 
-                // 输出结果，包裹在 result-card 容器中以应用动画
                 output.innerHTML = `
                     <div class="result-card">
                         <div class="card">
@@ -416,6 +361,7 @@
                             <div class="card-body">
                                 ${result.options.map(opt => `
                                     <div class="option-pill">
+                                        <button class="btn-copy" onclick="copyText(this)">复制文本</button>
                                         <span class="option-tag">PATH // ${opt.tag}</span>
                                         <div class="option-text">${opt.text}</div>
                                     </div>
