@@ -99,48 +99,35 @@
     <script>
     // ...之前的代码保持不变...
     async function startAnalysis() {
-        const chat = document.getElementById('chatInput').value;
-        const goal = document.getElementById('goalSelect').value;
-        const output = document.getElementById('output');
-        if(!chat) return alert("请输入内容");
+    // ...前面的获取内容逻辑不变...
+    output.innerHTML = `<div style="text-align:center; color:var(--cyan);">信号发射中... 请保持网络稳定</div>`;
 
-        output.innerHTML = `<div style="text-align:center; color:var(--cyan);">大脑连接中...</div>`;
+    try {
+        const response = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: fullPrompt })
+        });
 
-        const fullPrompt = `你现在是社交引擎“罗塞塔”。[画像碎片]：${portraitTags.join(', ')} [当前对话]：${chat} [用户目标]：${goal} 请分析并返回JSON。`;
+        const data = await response.json();
 
-        try {
-            const response = await fetch('/api/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: fullPrompt })
-            });
-
-            const data = await response.json();
-
-            // 如果后端传回了 Google 的具体错误
-            if (data.googleError) {
-              throw new Error("Google 拒绝了请求：" + data.googleError);
-            }
-
-            // 正常解析
-            const aiText = data.candidates[0].content.parts[0].text;
-            const cleanJson = aiText.replace(/```json|```/g, '').trim();
-            const result = JSON.parse(cleanJson);
-            
-            // ...更新 UI 的逻辑 (currentAff 等)...
-            output.innerHTML = `<div class="card">推演结果：${result.inference}</div>`; 
-
-        } catch (err) {
-            output.innerHTML = `<div style="color:red; font-size:12px; padding:20px;">
-                🚨 破译中断！<br>
-                详细原因：${err.message}<br><br>
-                💡 解决建议：<br>
-                1. 检查 Vercel 里的 API Key 是否有空格。<br>
-                2. 检查 Google AI Studio 是否给了权限。<br>
-                3. 确保你的“魔法”网络稳定。
-            </div>`;
+        // 如果后端传回了错误
+        if (data.error) {
+            throw new Error(data.error);
         }
+
+        // 正常解析数据 (此处代码同前)
+        const aiText = data.candidates[0].content.parts[0].text;
+        // ...后续渲染逻辑...
+
+    } catch (err) {
+        output.innerHTML = `<div style="color:red; padding:20px; border:1px solid red; border-radius:8px;">
+            分析失败！<br>
+            [故障代码]：${err.message}<br><br>
+            <small>提示：如果是“Google 报错: API key not valid”，说明 Key 确实错了。</small>
+        </div>`;
     }
+}
 </script>
 </body>
 </html>
